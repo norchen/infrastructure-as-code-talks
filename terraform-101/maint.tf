@@ -10,7 +10,7 @@ provider "aws" {
 
 # set variables
 variable "s3_bucket_name" {
-  description = "the bucket name for our website bucket"
+  description = "the s3 bucket name"
   type        = string
 }
 
@@ -46,7 +46,7 @@ POLICY
 # s3 object
 resource "aws_s3_bucket_object" "website" {
   bucket       = aws_s3_bucket.website.id
-  key          = "index.html"          # how your file will be named in S3 Bucket (we need an index.html)
+  key          = "index.html"          # how your file will be named in the S3 Bucket (we need an index.html)
   source       = "index.html"          # set the path to your "index.html" (here it lies in the same directory) 
   content_type = "text/html"           # use the respective MIME type for your object 
   etag         = filemd5("index.html") # same path as in source 
