@@ -4,9 +4,8 @@
 # set provider
 # the starting point to connect to AWS
 provider "aws" {
-  # the profile you configured via AWS CLI 
-  profile = "test"
-  region  = "us-east-1"
+  profile = "test"      # the profile you configured via AWS CLI 
+  region  = "us-east-1" # the region you want to deploy to 
 }
 
 # set variables
@@ -47,9 +46,9 @@ POLICY
 # s3 object
 resource "aws_s3_bucket_object" "website" {
   bucket       = aws_s3_bucket.website.id
-  key          = "index.html" # how your file will be named in S3 Bucket (we need an index.html)
-  source       = "index.html" # set the path to your "index.html" (here it lies in the same directory) 
-  content_type = "text/html" # use the respective MIME type) 
+  key          = "index.html"          # how your file will be named in S3 Bucket (we need an index.html)
+  source       = "index.html"          # set the path to your "index.html" (here it lies in the same directory) 
+  content_type = "text/html"           # use the respective MIME type) 
   etag         = filemd5("index.html") # same path as in source 
 }
 
