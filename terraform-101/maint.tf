@@ -10,8 +10,15 @@
 ------------------------------------------------------------*/
 # the starting point to connect to AWS
 provider "aws" {
-  profile = "test"      # the profile you configured via AWS CLI 
-  region  = var.region  # the region you want to deploy to 
+  profile = "test"      # the profile you configured via AWS CLI
+  region  = var.region  # the region you want to deploy to
+
+  # default tags to be added to every AWS ressource
+      default_tags {
+        tags = {
+          Owner = "Wolkencode"
+        }
+      }
 }
 
 # configure terraform version and backend properties
@@ -23,11 +30,6 @@ terraform {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 4.10.0"
-
-      # default tags to be added to every AWS ressource
-      default_tags = {
-        Owner = "Wolkencode"
-      }
     }
   }
 
