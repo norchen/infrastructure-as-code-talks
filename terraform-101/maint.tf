@@ -63,31 +63,34 @@ variable "region" {
 # s3 bucket
 resource "aws_s3_bucket" "website" {
   bucket = local.s3_bucket_name
-
-  policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
-      {
-          "Sid": "PublicReadGetObject",
-          "Effect": "Allow",
-          "Principal": "*",
-          "Action": [
-              "s3:GetObject"
-          ],
-          "Resource": [
-              "arn:aws:s3:::${local.s3_bucket_name}/*"
-          ]
-      }
-  ]
-}
-POLICY
 }
 
 # s3 access control lists (acl) configuration (since aws provider version 4.9)
 resource "aws_s3_bucket_acl" "example" {
   bucket = aws_s3_bucket.website.id
   acl    = "public-read"
+}
+
+resource "aws_s3_bucket_policy" "website" {
+  bucket = aws_s3_bucket.website.id
+  policy = jsonencode(
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+          {
+              "Sid": "PublicReadGetObject",
+              "Effect": "Allow",
+              "Principal": "*",
+              "Action": [
+                  "s3:GetObject"
+              ],
+              "Resource": [
+                  "arn:aws:s3:::${local.s3_bucket_name}/*"
+              ]
+          }
+      ]
+    }
+  )
 }
 
 # s3 website configuration (since aws provider version 4.9)
@@ -100,7 +103,7 @@ resource "aws_s3_bucket_website_configuration" "website" {
 }
 
 # s3 object
-resource "aws_s3_bucket_object" "website" {
+resource "aws_s3_object" "website" {
   bucket       = aws_s3_bucket.website.id
   key          = "index.html"          # how your file will be named in the S3 Bucket (we need an index.html)
   source       = "index.html"          # set the path to your "index.html" (here it lies in the same directory) 
