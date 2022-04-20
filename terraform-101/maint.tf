@@ -10,15 +10,15 @@
 ------------------------------------------------------------*/
 # the starting point to connect to AWS
 provider "aws" {
-  profile = "test"      # the profile you configured via AWS CLI
-  region  = var.region  # the region you want to deploy to
+  profile = "test"     # the profile you configured via AWS CLI
+  region  = var.region # the region you want to deploy to
 
   # default tags to be added to every AWS ressource
-      default_tags {
-        tags = {
-          Owner = "Wolkencode"
-        }
-      }
+  default_tags {
+    tags = {
+      Owner = "Wolkencode"
+    }
+  }
 }
 
 # configure terraform version and backend properties
@@ -38,14 +38,14 @@ terraform {
 
   # if applicable put your remote backend configuration here (e.g. S3 backend)
   # backend "s3" {...}
-} 
+}
 
 /* ----------------------------------------------------------
   set locals & variables
 ------------------------------------------------------------*/
 locals {
   s3_bucket_name = join("-", [
-    "my-bucket-", 
+    "my-bucket-",
     var.region,
     timestamp()
   ])
@@ -54,7 +54,7 @@ locals {
 variable "region" {
   description = "The AWS region to deploy to"
   type        = string
-  default = "us-east-1"
+  default     = "us-east-1"
 }
 
 /* ----------------------------------------------------------
@@ -75,19 +75,19 @@ resource "aws_s3_bucket_policy" "website" {
   bucket = aws_s3_bucket.website.id
   policy = jsonencode(
     {
-      "Version": "2012-10-17",
-      "Statement": [
-          {
-              "Sid": "PublicReadGetObject",
-              "Effect": "Allow",
-              "Principal": "*",
-              "Action": [
-                  "s3:GetObject"
-              ],
-              "Resource": [
-                  "arn:aws:s3:::${local.s3_bucket_name}/*"
-              ]
-          }
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Sid" : "PublicReadGetObject",
+          "Effect" : "Allow",
+          "Principal" : "*",
+          "Action" : [
+            "s3:GetObject"
+          ],
+          "Resource" : [
+            "arn:aws:s3:::${local.s3_bucket_name}/*"
+          ]
+        }
       ]
     }
   )
