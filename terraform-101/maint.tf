@@ -1,24 +1,67 @@
-# ----------------------------------------------------------
-# main.tf
-# ----------------------------------------------------------
-# set provider
+/* ----------------------------------------------------------
+  main.tf
+  * maintained by @norchen
+  * for educational purpose only, no production readyness 
+    garantued
+------------------------------------------------------------*/
+
+/* ----------------------------------------------------------
+  set provider
+------------------------------------------------------------*/
 # the starting point to connect to AWS
 provider "aws" {
   profile = "test"      # the profile you configured via AWS CLI 
-  region  = "us-east-1" # the region you want to deploy to 
+  region  = var.region  # the region you want to deploy to 
 }
 
-# set variables
-variable "s3_bucket_name" {
-  description = "the s3 bucket name"
+# configure terraform version and backend properties
+terraform {
+  required_providers {
+
+    # sets version for AWS Terraform provider
+    # https://github.com/hashicorp/terraform-provider-aws/blob/main/CHANGELOG.md
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.10.0"
+
+      # default tags to be added to every AWS ressource
+      default_tags = {
+        Owner = "Wolkencode"
+      }
+    }
+  }
+
+  # sets Terraform version
+  required_version = ">= 1.1"
+
+  # if applicable put your remote backend configuration here (e.g. S3 backend)
+  # backend "s3" {...}
+} 
+
+/* ----------------------------------------------------------
+  set locals & variables
+------------------------------------------------------------*/
+locals {
+  s3_bucket_name = join("-", [
+    "my-bucket-", 
+    var.region,
+    timestamp()
+  ])
+}
+
+variable "region" {
+  description = "The AWS region to deploy to"
   type        = string
+  default = "us-east-1"
 }
 
-# set resources
+/* ----------------------------------------------------------
+  set resources
+------------------------------------------------------------*/
 # s3 bucket
 resource "aws_s3_bucket" "website" {
-  bucket = var.s3_bucket_name
-  acl    = "public-read"
+  bucket = local.s3_bucket_name
+
   policy = <<POLICY
 {
   "Version": "2012-10-17",
@@ -31,15 +74,26 @@ resource "aws_s3_bucket" "website" {
               "s3:GetObject"
           ],
           "Resource": [
-              "arn:aws:s3:::${var.s3_bucket_name}/*"
+              "arn:aws:s3:::${local.s3_bucket_name}/*"
           ]
       }
   ]
 }
 POLICY
+}
 
-  website {
-    index_document = "index.html"
+# s3 access control lists (acl) configuration (since aws provider version 4.9)
+resource "aws_s3_bucket_acl" "example" {
+  bucket = aws_s3_bucket.website.id
+  acl    = "public-read"
+}
+
+# s3 website configuration (since aws provider version 4.9)
+resource "aws_s3_bucket_website_configuration" "website" {
+  bucket = aws_s3_bucket.website.bucket
+
+  index_document {
+    suffix = "index.html"
   }
 }
 
@@ -52,7 +106,9 @@ resource "aws_s3_bucket_object" "website" {
   etag         = filemd5("index.html") # same path as in source 
 }
 
-# set output
+/* ----------------------------------------------------------
+  set output
+------------------------------------------------------------*/
 output "s3_bucket_website_url" {
   value = aws_s3_bucket.website.website_endpoint
 }
