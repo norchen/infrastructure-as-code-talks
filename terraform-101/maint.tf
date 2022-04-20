@@ -45,9 +45,9 @@ terraform {
 ------------------------------------------------------------*/
 locals {
   s3_bucket_name = join("-", [
-    "my-bucket-",
+    "my-bucket",
     var.region,
-    timestamp()
+    formatdate("DD-MM-YY", timestamp())
   ])
 }
 
@@ -105,6 +105,7 @@ resource "aws_s3_bucket_website_configuration" "website" {
 # s3 object
 resource "aws_s3_object" "website" {
   bucket       = aws_s3_bucket.website.id
+  acl          = "public-read"
   key          = "index.html"          # how your file will be named in the S3 Bucket (we need an index.html)
   source       = "index.html"          # set the path to your "index.html" (here it lies in the same directory) 
   content_type = "text/html"           # use the respective MIME type for your object 
@@ -115,5 +116,5 @@ resource "aws_s3_object" "website" {
   set output
 ------------------------------------------------------------*/
 output "s3_bucket_website_url" {
-  value = aws_s3_bucket.website.website_endpoint
+  value = aws_s3_bucket_website_configuration.website.website_endpoint
 }
